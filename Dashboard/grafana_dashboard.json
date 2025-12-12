@@ -1,0 +1,357 @@
+{
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      }
+    ]
+  },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "links": [],
+  "panels": [
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "ff5qm3hr0mepsa"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [
+            {
+              "options": {
+                "0": {
+                  "index": 1,
+                  "text": "Not Functional"
+                },
+                "1": {
+                  "index": 0,
+                  "text": "Functional"
+                }
+              },
+              "type": "value"
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "red",
+                "value": 0
+              },
+              {
+                "color": "green",
+                "value": 1
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 0
+      },
+      "id": 3,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "12.3.0",
+      "targets": [
+        {
+          "query": "from(bucket: \"mqtt_bucket\")\n  |> range(start: -24h)\n  |> filter(fn: (r) => r._measurement == \"mqtt_consumer\")\n  |> filter(fn: (r) => r.device_id == \"kitchen_node_1\")\n  |> filter(fn: (r) => r._field == \"functional\")\n  |> group(columns: [\"device_id\"])\n  |> last()\n  |> map(fn: (r) => ({\n      _time: r._time,\n      _measurement: \"functional_flag\",\n      device_id: r.device_id,\n      _field: \"functional_flag\",\n      _value: if r._value == 1 then 1 else 0\n    }))\n  |> keep(columns: [\"_time\", \"_value\", \"device_id\"])\n",
+          "refId": "A"
+        }
+      ],
+      "title": "New panFunctional Status (1 = OK)el",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "ff5qm3hr0mepsa"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [
+            {
+              "options": {
+                "0": {
+                  "index": 1,
+                  "text": "Wifi"
+                },
+                "1": {
+                  "index": 0,
+                  "text": "Ethernet"
+                }
+              },
+              "type": "value"
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "red",
+                "value": 0
+              },
+              {
+                "color": "green",
+                "value": 1
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 8
+      },
+      "id": 2,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "12.3.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "ff5qm3hr0mepsa"
+          },
+          "query": "from(bucket: \"mqtt_bucket\")\n  |> range(start: -24h)\n  |> filter(fn: (r) => r._measurement == \"mqtt_consumer\")\n  |> filter(fn: (r) => r.device_id == \"kitchen_node_1\")\n  |> filter(fn: (r) => r._field == \"temp\")          // pick one field as source\n  |> group(columns: [\"device_id\"])                  // drop connection_type as series key\n  |> last()                                         // only the latest row for this device\n  |> map(fn: (r) => ({\n      _time: r._time,\n      _measurement: \"connection_type_flag\",\n      device_id: r.device_id,\n      _field: \"connection_type_flag\",\n      _value: if r.connection_type == \"1\" then 1 else 0\n    }))\n  |> keep(columns: [\"_time\", \"_value\", \"device_id\", \"connection_type\"])\n",
+          "refId": "A"
+        }
+      ],
+      "title": "Connection Type ( 1 = ON)",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "ff5qm3hr0mepsa"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "stepAfter",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "showValues": false,
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "humidity"
+            },
+            "properties": [
+              {
+                "id": "custom.axisPlacement",
+                "value": "left"
+              },
+              {
+                "id": "custom.axisLabel",
+                "value": "Humidity (%)"
+              },
+              {
+                "id": "displayName",
+                "value": "Humidity"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "temp"
+            },
+            "properties": [
+              {
+                "id": "custom.axisPlacement",
+                "value": "left"
+              },
+              {
+                "id": "custom.axisLabel",
+                "value": "Temp (C)"
+              },
+              {
+                "id": "displayName",
+                "value": "Temp"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "pressure"
+            },
+            "properties": [
+              {
+                "id": "custom.axisPlacement",
+                "value": "right"
+              },
+              {
+                "id": "custom.axisLabel",
+                "value": "Pressure (PSI)"
+              },
+              {
+                "id": "displayName",
+                "value": "Pressure"
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 16
+      },
+      "id": 1,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "12.3.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "ff5qm3hr0mepsa"
+          },
+          "query": "from(bucket: \"mqtt_bucket\")\n  |> range(start: -15m)\n  |> filter(fn: (r) => r._measurement == \"mqtt_consumer\")\n  |> filter(fn: (r) => r.device_id == \"kitchen_node_1\")\n  |> filter(fn: (r) =>\n    r._field == \"temp\" or\n    r._field == \"humidity\" or\n    r._field == \"pressure\"\n  )\n",
+          "refId": "A"
+        }
+      ],
+      "title": "Kitchen Node 1 – Env Data (Temp / Humidity / Pressure)",
+      "type": "timeseries"
+    }
+  ],
+  "preload": false,
+  "schemaVersion": 42,
+  "tags": [],
+  "templating": {
+    "list": []
+  },
+  "time": {
+    "from": "now-1m",
+    "to": "now"
+  },
+  "timepicker": {},
+  "timezone": "browser",
+  "title": "Kitchen Node 1 – Env Data (Temp / Humidity / Pressure)",
+  "uid": "adnknv7",
+  "version": 11
+}
