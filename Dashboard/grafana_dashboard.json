@@ -318,6 +318,7 @@
           "placement": "bottom",
           "showLegend": true
         },
+        
         "tooltip": {
           "hideZeros": false,
           "mode": "single",
